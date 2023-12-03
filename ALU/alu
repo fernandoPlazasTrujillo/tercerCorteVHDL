@@ -1,0 +1,121 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity alu is
+
+  port (
+        A, B : in std_logic_vector(7 downto 0);
+		  ALU_sel : in std_logic_vector(2 downto 0);
+		  NZVC : out std_logic_vector(3 downto 0);
+		  result : out std_logic_vector(7 downto 0));
+		  
+end alu; 
+
+architecture arch_alu of alu is
+
+
+   begin 
+      
+		ALU_PROCESS : process (A, B, ALU_Sel)
+         
+			variable Sum_uns : unsigned(8 downto 0);
+			variable sub_uns : unsigned(8 downto 0);
+			variable and_uns : unsigned(8 downto 0);
+			variable or_uns  : unsigned(8 downto 0);
+      
+		      begin
+               
+					if (ALU_Sel = "000") then
+
+------------------------ Sum Calculation ---------------------------------–
+
+                  Sum_uns := unsigned('0' & A) + unsigned('0' & B);
+                  Result <= std_logic_vector(Sum_uns(7 downto 0));
+		
+------------------------ Negative Flag (N) -------------------------------
+
+                  NZVC(3) <= Sum_uns(7);
+
+------------------------- Zero Flag (Z) ---------------------------------–
+
+                  if (Sum_uns(7 downto 0) = x"00") then
+                      NZVC(2) <= '1';
+                       else
+                       NZVC(2) <= '0';
+                  end if;
+						
+----------------------- Overflow Flag (V) -------------------------------
+
+                  if ((A(7)='0' and B(7)='0' and Sum_uns(7)='1') or
+                      (A(7)='1' and B(7)='1' and Sum_uns(7)='0')) then
+                       NZVC(1) <= '1';
+                        else
+                       NZVC(1) <= '0';
+                  end if;
+						
+----------------------- Carry Flag (C) ------------------------------------
+
+                  NZVC(0) <= Sum_uns(8);
+					
+					
+					
+					elsif (ALU_Sel = "001") then
+					
+					
+----------------------- Rest calculation ----------------------------------
+
+                 Sub_uns := unsigned('0' & A) - unsigned('0' & B);
+                 Result <= std_logic_vector(Sub_uns(7 downto 0));
+
+----------------- Negative flag (N) ---------------------------------------
+
+                 NZVC(3) <= Sub_uns(7);
+
+----------------- Zero flag (Z) -------------------------------------------
+
+                 if (Sub_uns(7 downto 0) = x"00") then
+                     NZVC(2) <= '1';
+                 else
+                     NZVC(2) <= '0';
+                 end if;
+
+----------------- Overflow flag (V) ---------------------------------------
+
+                 if ((A(7)='1' and B(7)='0' and Sub_uns(7)='0') or (A(7)='0' and B(7)='1' and Sub_uns(7)='1')) then
+                     NZVC(1) <= '1';
+                 else
+                    NZVC(1) <= '0';
+                 end if;
+
+----------------- carry flag (C) ------------------------------------------
+
+                 if (sub_uns(8) = '1') then 
+					      NZVC(0) <= '1';
+					  else 
+					      NZVC(0) <= '0';
+					  end if;
+						
+						
+						
+---------------------------- And Calculation ------------------------------
+						
+					elsif (ALU_Sel = "010") then
+					
+					       and_uns := unsigned('0' & A) and unsigned('0' & B);
+							 result <= std_logic_vector(and_uns(7 downto 0));
+					
+					
+--------------------------- Or Calculation --------------------------------
+					
+					elsif (ALU_Sel = "011") then
+					
+					       or_uns := unsigned('0' & A) or unsigned('0' & B);
+							 result <= std_logic_vector(or_uns(7 downto 0));
+					       
+							 
+				end if;
+
+     end process;
+	  
+end arch_alu;
